@@ -126,8 +126,14 @@ BOOL SHKinit;
 	// If a view is already being shown, hide it, and then try again
 	if (currentView != nil)
 	{
-		self.pendingView = vc;
-		[[currentView parentViewController] dismissModalViewControllerAnimated:YES];
+		self.pendingView = vc;       
+		if ([currentView respondsToSelector:@selector(presentingViewController)]) { // iOS 5
+			[[currentView presentingViewController] dismissModalViewControllerAnimated:YES];
+		}
+		else { // pre iOS 5
+			[[currentView parentViewController] dismissModalViewControllerAnimated:YES];
+		}
+        
 		return;
 	}
 		
@@ -176,11 +182,15 @@ BOOL SHKinit;
 	if (isDismissingView)
 		return;
 	
-	if (currentView != nil)
-	{
+	if (currentView != nil)	{
 		// Dismiss the modal view
-		if ([currentView parentViewController] != nil)
-		{
+		
+		
+		if ([currentView respondsToSelector:@selector(presentingViewController)] && [currentView presentingViewController] != nil) { // iOS 5
+			self.isDismissingView = YES;
+			[[currentView presentingViewController] dismissModalViewControllerAnimated:animated];
+		}
+		else if ([currentView parentViewController] != nil)	{ // pre iOS 5
 			self.isDismissingView = YES;
 			[[currentView parentViewController] dismissModalViewControllerAnimated:animated];
 		}
