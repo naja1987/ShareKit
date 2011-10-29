@@ -32,6 +32,7 @@ static NSString *const kSHKFacebookAccessTokenKey=@"kSHKFacebookAccessToken";
 static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 
 @interface SHKFacebook()
+- (void) showFacebookForm;
 + (Facebook*)facebook;
 + (void)flushAccessToken;
 + (NSString *)storedImagePath:(UIImage*)image;
@@ -47,23 +48,23 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 
 + (Facebook*)facebook 
 {
-  static Facebook *facebook=nil;
-  @synchronized([SHKFacebook class]) {
-    if (! facebook)
-      facebook = [[Facebook alloc] initWithAppId:SHKFacebookAppID];
-  }
-  return facebook;
+	static Facebook *facebook=nil;
+	@synchronized([SHKFacebook class]) {
+		if (! facebook)
+			facebook = [[Facebook alloc] initWithAppId:SHKFacebookAppID];
+	}
+	return facebook;
 }
 
 + (void)flushAccessToken 
 {
-  Facebook *facebook = [self facebook];
-  facebook.accessToken = nil;
-  facebook.expirationDate = nil;
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults removeObjectForKey:kSHKFacebookAccessTokenKey];
-  [defaults removeObjectForKey:kSHKFacebookExpiryDateKey];
-  [defaults synchronize];
+	Facebook *facebook = [self facebook];
+	facebook.accessToken = nil;
+	facebook.expirationDate = nil;
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	[defaults removeObjectForKey:kSHKFacebookAccessTokenKey];
+	[defaults removeObjectForKey:kSHKFacebookExpiryDateKey];
+	[defaults synchronize];
 }
 
 + (NSString *)storedImagePath:(UIImage*)image
@@ -77,34 +78,34 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 	if (![fileManager fileExistsAtPath:imagePath]) 
 		[fileManager createDirectoryAtPath:imagePath withIntermediateDirectories:YES attributes:nil error:nil];
 	
-  NSString *uid = [NSString stringWithFormat:@"img-%i-%i", [[NSDate date] timeIntervalSince1970], arc4random()];    
-  // store image in cache
-  NSData *imageData = UIImagePNGRepresentation(image);
-  imagePath = [imagePath stringByAppendingPathComponent:uid];
-  [imageData writeToFile:imagePath atomically:YES];
-  
+	NSString *uid = [NSString stringWithFormat:@"img-%i-%i", [[NSDate date] timeIntervalSince1970], arc4random()];    
+	// store image in cache
+	NSData *imageData = UIImagePNGRepresentation(image);
+	imagePath = [imagePath stringByAppendingPathComponent:uid];
+	[imageData writeToFile:imagePath atomically:YES];
+	
 	return imagePath;
 }
 
 + (UIImage*)storedImage:(NSString*)imagePath {
-  NSData *imageData = [NSData dataWithContentsOfFile:imagePath];
-  UIImage *image = nil;
-  if (imageData) {
-    image = [UIImage imageWithData:imageData];
-  }
-  // Unlink the stored file:
-  [[NSFileManager defaultManager] removeItemAtPath:imagePath error:nil];
-  return image;
+	NSData *imageData = [NSData dataWithContentsOfFile:imagePath];
+	UIImage *image = nil;
+	if (imageData) {
+		image = [UIImage imageWithData:imageData];
+	}
+	// Unlink the stored file:
+	[[NSFileManager defaultManager] removeItemAtPath:imagePath error:nil];
+	return image;
 }
 
 + (BOOL)handleOpenURL:(NSURL*)url 
 {
-  Facebook *fb = [SHKFacebook facebook];
-  if (! fb.sessionDelegate) {
-    SHKFacebook *sharer = [[[SHKFacebook alloc] init] autorelease];
-    fb.sessionDelegate = sharer;
-  }
-  return [fb handleOpenURL:url];
+	Facebook *fb = [SHKFacebook facebook];
+	if (! fb.sessionDelegate) {
+		SHKFacebook *sharer = [[[SHKFacebook alloc] init] autorelease];
+		fb.sessionDelegate = sharer;
+	}
+	return [fb handleOpenURL:url];
 }
 
 #pragma mark -
@@ -138,42 +139,42 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 #pragma mark -
 #pragma mark Configuration : Dynamic Enable
 
-- (BOOL)shouldAutoShare
+/*- (BOOL)shouldAutoShare
 {
 	return YES;
-}
+}*/
 
 #pragma mark -
 #pragma mark Authentication
 
 - (BOOL)isAuthorized
 {	  
-  Facebook *facebook = [SHKFacebook facebook];
-  if ([facebook isSessionValid]) return YES;
-  
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  facebook.accessToken = [defaults stringForKey:kSHKFacebookAccessTokenKey];
-  facebook.expirationDate = [defaults objectForKey:kSHKFacebookExpiryDateKey];
-  return [facebook isSessionValid];
+	Facebook *facebook = [SHKFacebook facebook];
+	if ([facebook isSessionValid]) return YES;
+	
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	facebook.accessToken = [defaults stringForKey:kSHKFacebookAccessTokenKey];
+	facebook.expirationDate = [defaults objectForKey:kSHKFacebookExpiryDateKey];
+	return [facebook isSessionValid];
 }
 
 - (void)promptAuthorization
 {
-  NSMutableDictionary *itemRep = [NSMutableDictionary dictionaryWithDictionary:[self.item dictionaryRepresentation]];
-  if (item.image)
-  {
-    [itemRep setObject:[SHKFacebook storedImagePath:item.image] forKey:@"imagePath"];
-  }
-  [[NSUserDefaults standardUserDefaults] setObject:itemRep forKey:kSHKStoredItemKey];
+	NSMutableDictionary *itemRep = [NSMutableDictionary dictionaryWithDictionary:[self.item dictionaryRepresentation]];
+	if (item.image)
+	{
+		[itemRep setObject:[SHKFacebook storedImagePath:item.image] forKey:@"imagePath"];
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:itemRep forKey:kSHKStoredItemKey];
 #ifdef SHKFacebookLocalAppID
-  [[SHKFacebook facebook] authorize:[NSArray arrayWithObjects:@"publish_stream", 
-                                     @"offline_access", nil]
-                           delegate:self
-                         localAppId:SHKFacebookLocalAppID];
+	[[SHKFacebook facebook] authorize:[NSArray arrayWithObjects:@"publish_stream", 
+									   @"offline_access", nil]
+							 delegate:self
+						   localAppId:SHKFacebookLocalAppID];
 #else
-  [[SHKFacebook facebook] authorize:[NSArray arrayWithObjects:@"publish_stream", 
-                                     @"offline_access", nil]
-                           delegate:self];
+	[[SHKFacebook facebook] authorize:[NSArray arrayWithObjects:@"publish_stream", 
+									   @"offline_access", nil]
+							 delegate:self];
 #endif
 }
 
@@ -183,9 +184,9 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 
 + (void)logout
 {
-  [[NSUserDefaults standardUserDefaults] removeObjectForKey:kSHKStoredItemKey];
-  [self flushAccessToken];
-  [[self facebook] logout:nil];
+	[[NSUserDefaults standardUserDefaults] removeObjectForKey:kSHKStoredItemKey];
+	[self flushAccessToken];
+	[[self facebook] logout:nil];
 }
 
 #pragma mark -
@@ -193,50 +194,89 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 
 - (BOOL)send
 {			
-  NSMutableDictionary *params = [NSMutableDictionary dictionary];
-  NSString *actions = [NSString stringWithFormat:@"{\"name\":\"Get %@\",\"link\":\"%@\"}",  
-                       SHKMyAppName, SHKMyAppURL];
-  [params setObject:actions forKey:@"actions"];
-
+	NSMutableDictionary *params = [NSMutableDictionary dictionary];
+	NSString *actions = [NSString stringWithFormat:@"{\"name\":\"Get %@\",\"link\":\"%@\"}",  
+						 SHKMyAppName, SHKMyAppURL];
+	[params setObject:actions forKey:@"actions"];
+	
+	NSString *graphPath = nil;
+	
 	if (item.shareType == SHKShareTypeURL && item.URL)
 	{
-    NSString *url = [item.URL absoluteString];
-    [params setObject:url forKey:@"link"];
-    [params setObject:item.title == nil ? url : item.title
-               forKey:@"name"];    
-    if (item.text)
-      [params setObject:item.text forKey:@"message"];
-    NSString *pictureURI = [item customValueForKey:@"picture"];
-    if (pictureURI)
-      [params setObject:pictureURI forKey:@"picture"];
+		NSString *url = [item.URL absoluteString];
+		[params setObject:url forKey:@"link"];
+		[params setObject:item.title == nil ? url : item.title
+				   forKey:@"name"];    
+		if (item.text)
+			[params setObject:item.text forKey:@"message"];
+		NSString *pictureURI = [item customValueForKey:@"picture"];
+		if (pictureURI)
+			[params setObject:pictureURI forKey:@"picture"];
+		
+//		graphPath = @"me/feed";
+		[[SHKFacebook facebook] dialog:@"feed" andParams:params andDelegate:self];
+		
+		return YES;
 	}
 	else if (item.shareType == SHKShareTypeText && item.text)
 	{
-    [params setObject:item.text forKey:@"message"];
+		[params setObject:item.text forKey:@"message"];
+		graphPath = @"me/feed";
 	}	
 	else if (item.shareType == SHKShareTypeImage && item.image)
 	{	
-    if (item.title) 
-      [params setObject:item.title forKey:@"caption"];
-    if (item.text) 
-      [params setObject:item.text forKey:@"message"];
-    [params setObject:item.image forKey:@"picture"];
-    // There does not appear to be a way to add the photo 
-    // via the dialog option:
-    [[SHKFacebook facebook] requestWithGraphPath:@"me/photos"
-                                       andParams:params
-                                   andHttpMethod:@"POST"
-                                     andDelegate:self];
-    return YES;
+		if (item.title) 
+			[params setObject:item.title forKey:@"caption"];
+		if (item.text) 
+			[params setObject:item.text forKey:@"message"];
+		[params setObject:item.image forKey:@"picture"];
+
+		graphPath = @"me/photos";
 	} 
-  else 
-    // There is nothing to send
-    return NO;
-  
-  [[SHKFacebook facebook] dialog:@"feed"
-                       andParams:params 
-                     andDelegate:self];
+	else 
+		// There is nothing to send
+		return NO;
+	
+	
+	[[SHKFacebook facebook] requestWithGraphPath:graphPath
+									   andParams:params
+								   andHttpMethod:@"POST"
+									 andDelegate:self];
+	
 	return YES;
+}
+
+#pragma mark -
+#pragma mark UI Implementation
+
+- (void)show {
+	if (item.shareType == SHKShareTypeText)
+	{
+		[self showFacebookForm];
+	}
+	// TODO show form for link and image as well??
+	else {
+		[self tryToSend];
+	}
+}
+
+- (void)showFacebookForm {
+	SHKFacebookForm *rootView = [[SHKFacebookForm alloc] initWithNibName:nil bundle:nil];	
+	rootView.delegate = self;
+	
+	// force view to load so we can set textView text
+	[rootView view];
+	
+	rootView.textView.text = item.text;
+	
+	[self pushViewController:rootView animated:NO];
+	
+	[[SHK currentHelper] showViewController:self];	
+}
+
+- (void)sendForm:(SHKFacebookForm *)form {
+	item.text = form.textView.text;
+	[self tryToSend];
 }
 
 #pragma mark -
@@ -244,29 +284,29 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 
 - (void)dialogDidComplete:(FBDialog *)dialog
 {
-  [self sendDidFinish];  
+	[self sendDidFinish];  
 }
 
 - (void)dialogCompleteWithUrl:(NSURL *)url 
 {
-  // error_code=190: user changed password or revoked access to the application,
-  // so spin the user back over to authentication :
-  NSRange errorRange = [[url absoluteString] rangeOfString:@"error_code=190"];
-  if (errorRange.location != NSNotFound) 
-  {
-    [SHKFacebook flushAccessToken];
-    [self authorize];
-  }
+	// error_code=190: user changed password or revoked access to the application,
+	// so spin the user back over to authentication :
+	NSRange errorRange = [[url absoluteString] rangeOfString:@"error_code=190"];
+	if (errorRange.location != NSNotFound) 
+	{
+		[SHKFacebook flushAccessToken];
+		[self authorize];
+	}
 }
 
 - (void)dialogDidCancel:(FBDialog*)dialog
 {
-  [self sendDidCancel];
+	[self sendDidCancel];
 }
 
 - (void)dialog:(FBDialog *)dialog didFailWithError:(NSError *)error 
 {
-  [self sendDidFailWithError:error];
+	[self sendDidFailWithError:error];
 }
 
 - (BOOL)dialog:(FBDialog*)dialog shouldOpenURLInExternalBrowser:(NSURL*)url
@@ -278,36 +318,36 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 
 - (void)fbDidLogin 
 {
-  NSString *accessToken = [[SHKFacebook facebook] accessToken];
-  NSDate *expiryDate = [[SHKFacebook facebook] expirationDate];
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:accessToken forKey:kSHKFacebookAccessTokenKey];
-  [defaults setObject:expiryDate forKey:kSHKFacebookExpiryDateKey];
-  NSDictionary *storedItem = [defaults objectForKey:kSHKStoredItemKey];
-  if (storedItem)
-  {
-    self.item = [SHKItem itemFromDictionary:storedItem];
-    NSString *imagePath = [storedItem objectForKey:@"imagePath"];
-    if (imagePath) {
-      self.item.image = [SHKFacebook storedImage:imagePath];
-    }
-    [defaults removeObjectForKey:kSHKStoredItemKey];
-  }
-  [defaults synchronize];
-  if (self.item) 
-    [self share];
+	NSString *accessToken = [[SHKFacebook facebook] accessToken];
+	NSDate *expiryDate = [[SHKFacebook facebook] expirationDate];
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setObject:accessToken forKey:kSHKFacebookAccessTokenKey];
+	[defaults setObject:expiryDate forKey:kSHKFacebookExpiryDateKey];
+	NSDictionary *storedItem = [defaults objectForKey:kSHKStoredItemKey];
+	if (storedItem)
+	{
+		self.item = [SHKItem itemFromDictionary:storedItem];
+		NSString *imagePath = [storedItem objectForKey:@"imagePath"];
+		if (imagePath) {
+			self.item.image = [SHKFacebook storedImage:imagePath];
+		}
+		[defaults removeObjectForKey:kSHKStoredItemKey];
+	}
+	[defaults synchronize];
+	if (self.item) 
+		[self share];
 }
 
 #pragma mark FBRequestDelegate methods
 
 - (void)requestLoading:(FBRequest *)request
 {
-  [self sendDidStart];
+	[self sendDidStart];
 }
 
 - (void)request:(FBRequest *)request didLoad:(id)result
 {
-  [self sendDidFinish];
+	[self sendDidFinish];
 }
 
 - (void)request:(FBRequest*)aRequest didFailWithError:(NSError*)error 

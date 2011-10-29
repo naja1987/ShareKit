@@ -1,8 +1,8 @@
 //
-//  SHKFacebook.h
+//  SHKFacebookForm.h
 //  ShareKit
 //
-//  Created by Nathan Weiner on 6/18/10.
+//  Created by Naja von Schmude on 29.10.11.
 
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,14 +25,18 @@
 //
 //
 
-#import <Foundation/Foundation.h>
-#import "Facebook.h"
-#import "SHKFacebookForm.h"
-#import "SHKSharer.h"
+#import <UIKit/UIKit.h>
 
-@interface SHKFacebook : SHKSharer <FBSessionDelegate, FBDialogDelegate, FBRequestDelegate>
+@interface SHKFacebookForm : UIViewController <UITextViewDelegate> {
+	
+	id delegate;
+	UITextView *textView;
+}
 
-+ (BOOL)handleOpenURL:(NSURL*)url;
-- (void)sendForm:(SHKFacebookForm *)form;
+@property (nonatomic, retain) id delegate;
+@property (nonatomic, retain) UITextView *textView;
+
+- (void) save;
+- (void) keyboardWillShow:(NSNotification *)notification;
 
 @end
