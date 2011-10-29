@@ -174,7 +174,11 @@
 		[mailController addAttachmentData:UIImageJPEGRepresentation(item.image, 1) mimeType:@"image/jpeg" fileName:@"Image.jpg"];
 	
 	[mailController setSubject:item.title];
-	[mailController setMessageBody:body isHTML:YES];
+	
+	// replace \n by <br/>
+	NSString *bodyBR = [body stringByReplacingOccurrencesOfString:@"\n" withString:@"<br/>"];
+	
+	[mailController setMessageBody:bodyBR isHTML:YES];
 			
 	[[SHK currentHelper] showViewController:mailController];
 	
