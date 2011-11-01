@@ -213,10 +213,10 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 		if (pictureURI)
 			[params setObject:pictureURI forKey:@"picture"];
 		
-//		graphPath = @"me/feed";
-		[[SHKFacebook facebook] dialog:@"feed" andParams:params andDelegate:self];
+		graphPath = @"me/feed";
+//		[[SHKFacebook facebook] dialog:@"feed" andParams:params andDelegate:self];
 		
-		return YES;
+//		return YES;
 	}
 	else if (item.shareType == SHKShareTypeText && item.text)
 	{
@@ -250,9 +250,16 @@ static NSString *const kSHKFacebookExpiryDateKey=@"kSHKFacebookExpiryDate";
 #pragma mark UI Implementation
 
 - (void)show {
-	if (item.shareType == SHKShareTypeText)
-	{
+	if (item.shareType == SHKShareTypeText) {
 		[self showFacebookForm];
+	}
+	else if (item.shareType == SHKShareTypeURL) {
+		if(item.text != nil && ! [item.text isEqualToString:@""]) {
+			[self showFacebookForm];
+		}
+		else {
+			[self tryToSend];
+		}
 	}
 	// TODO show form for link and image as well??
 	else {
