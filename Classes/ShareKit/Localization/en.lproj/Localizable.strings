@@ -31,6 +31,7 @@
 "Logging In..." = "Logging In...";
 "Login Error" = "Login Error";
 "Connecting..." = "Connecting...";
+"Sent from %@" = "Sent from %@";
 
 "Shortening URL..." = "Shortening URL...";
 "Shorten URL Error" = "Shorten URL Error";
