@@ -31,7 +31,11 @@
 
 @interface SHKTwitter : SHKOAuthSharer 
 {	
-	BOOL xAuth;		
+	BOOL xAuth;
+	
+	NSInteger imageURLLength;
+	NSInteger maxLenghShortendURL;
+	NSInteger lengthUnshortendURL;
 }
 
 @property BOOL xAuth;

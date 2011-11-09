@@ -34,12 +34,19 @@
 	UITextView *textView;
 	UILabel *counter;
 	BOOL hasAttachment;
+	BOOL hasURL;
+	
+	NSInteger unshortendURLLength;
+	NSInteger maxLengthShortendURL;
 }
 
 @property (nonatomic, retain) id delegate;
 @property (nonatomic, retain) UITextView *textView;
 @property (nonatomic, retain) UILabel *counter;
 @property BOOL hasAttachment;
+@property BOOL hasURL;
+@property NSInteger unshortendURLLength;
+@property NSInteger maxLengthShortendURL;
 
 - (void)layoutCounter;
 - (void)save;

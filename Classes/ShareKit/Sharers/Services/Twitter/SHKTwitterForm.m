@@ -36,6 +36,9 @@
 @synthesize textView;
 @synthesize counter;
 @synthesize hasAttachment;
+@synthesize hasURL;
+@synthesize unshortendURLLength;
+@synthesize maxLengthShortendURL;
 
 - (void)dealloc 
 {
@@ -172,8 +175,10 @@
 		[counter release];
 	}
 	
-	int count = (hasAttachment?115:140) - textView.text.length;
-	counter.text = [NSString stringWithFormat:@"%@%i", hasAttachment ? @"Image + ":@"" , count];
+	int imageURLLength = 25;
+	
+	int count = 140 - (hasAttachment ? imageURLLength : 0) - (hasURL ? maxLengthShortendURL : 0) + (hasURL ? unshortendURLLength : 0) - textView.text.length;
+	counter.text = [NSString stringWithFormat:@"%@%@%i", hasAttachment ? @"Image + ":@"", hasURL ? @"URL + ":@"" , count];
 	counter.textColor = count >= 0 ? [UIColor blackColor] : [UIColor redColor];
 }
 
@@ -210,7 +215,9 @@
 
 - (void)save
 {	
-	if (textView.text.length > (hasAttachment?115:140))
+	int imageURLLength = 25;
+	int count = 140 - (hasAttachment ? imageURLLength : 0) - (hasURL ? maxLengthShortendURL : 0) + (hasURL ? unshortendURLLength : 0) - textView.text.length;
+	if (count < 0)
 	{
 		[[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Message is too long")
 									 message:SHKLocalizedString(@"Twitter posts can only be 140 characters in length.")

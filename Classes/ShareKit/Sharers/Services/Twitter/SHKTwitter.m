@@ -46,6 +46,9 @@
 		// XAUTH
 		self.xAuth = SHKTwitterUseXAuth?YES:NO;
 		
+		maxLenghShortendURL = 21;
+		lengthUnshortendURL = 0;
+		imageURLLength = 25;
 		
 		// -- //
 		
@@ -187,7 +190,11 @@
 {
 	if (item.shareType == SHKShareTypeURL)
 	{
-		[self shortenURL];
+		//[self shortenURL];
+		NSString *encodedURL = [item.URL.absoluteString stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
+		lengthUnshortendURL = encodedURL.length;
+		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.text ? item.text : item.title, encodedURL] forKey:@"status"];
+		[self showTwitterForm];
 	}
 	
 	else if (item.shareType == SHKShareTypeImage)
@@ -214,6 +221,13 @@
 	rootView.textView.text = [item customValueForKey:@"status"];
 	rootView.hasAttachment = item.image != nil;
 	
+	// url handling
+	if(item.URL != nil) {
+		rootView.maxLengthShortendURL = maxLenghShortendURL;
+		rootView.unshortendURLLength = lengthUnshortendURL;
+	}
+	rootView.hasURL = item.URL != nil;
+	
 	[self pushViewController:rootView animated:NO];
 	
 	[[SHK currentHelper] showViewController:self];	
@@ -228,59 +242,59 @@
 
 #pragma mark -
 
-- (void)shortenURL
-{	
-	if (![SHK connected])
-	{
-		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.title, [item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] forKey:@"status"];
-		[self showTwitterForm];		
-		return;
-	}
-	
-	if (!quiet)
-		[[SHKActivityIndicator currentIndicator] displayActivity:SHKLocalizedString(@"Shortening URL...")];
-	
-	self.request = [[[SHKRequest alloc] initWithURL:[NSURL URLWithString:[NSMutableString stringWithFormat:@"http://api.bit.ly/v3/shorten?login=%@&apikey=%@&longUrl=%@&format=txt",
-																		  SHKBitLyLogin,
-																		  SHKBitLyKey,																		  
-																		  SHKEncodeURL(item.URL)
-																		  ]]
-											 params:nil
-										   delegate:self
-								 isFinishedSelector:@selector(shortenURLFinished:)
-											 method:@"GET"
-										  autostart:YES] autorelease];
-}
-
-- (void)shortenURLFinished:(SHKRequest *)aRequest
-{
-	[[SHKActivityIndicator currentIndicator] hide];
-	
-	NSString *result = [[aRequest getResult] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-	
-	if (result == nil || [NSURL URLWithString:result] == nil)
-	{
-		// TODO - better error message
-		[[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Shorten URL Error")
-									 message:SHKLocalizedString(@"We could not shorten the URL.")
-									delegate:nil
-						   cancelButtonTitle:SHKLocalizedString(@"Continue")
-						   otherButtonTitles:nil] autorelease] show];
-		
-		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.text ? item.text : item.title, [item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] forKey:@"status"];
-	}
-	
-	else
-	{		
-		///if already a bitly login, use url instead
-		if ([result isEqualToString:@"ALREADY_A_BITLY_LINK"])
-			result = [item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-		
-		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.text ? item.text : item.title, result] forKey:@"status"];
-	}
-	
-	[self showTwitterForm];
-}
+//- (void)shortenURL
+//{	
+//	if (![SHK connected])
+//	{
+//		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.title, [item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] forKey:@"status"];
+//		[self showTwitterForm];		
+//		return;
+//	}
+//	
+//	if (!quiet)
+//		[[SHKActivityIndicator currentIndicator] displayActivity:SHKLocalizedString(@"Shortening URL...")];
+//	
+//	self.request = [[[SHKRequest alloc] initWithURL:[NSURL URLWithString:[NSMutableString stringWithFormat:@"http://api.bit.ly/v3/shorten?login=%@&apikey=%@&longUrl=%@&format=txt",
+//																		  SHKBitLyLogin,
+//																		  SHKBitLyKey,																		  
+//																		  SHKEncodeURL(item.URL)
+//																		  ]]
+//											 params:nil
+//										   delegate:self
+//								 isFinishedSelector:@selector(shortenURLFinished:)
+//											 method:@"GET"
+//										  autostart:YES] autorelease];
+//}
+//
+//- (void)shortenURLFinished:(SHKRequest *)aRequest
+//{
+//	[[SHKActivityIndicator currentIndicator] hide];
+//	
+//	NSString *result = [[aRequest getResult] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+//	
+//	if (result == nil || [NSURL URLWithString:result] == nil)
+//	{
+//		// TODO - better error message
+//		[[[[UIAlertView alloc] initWithTitle:SHKLocalizedString(@"Shorten URL Error")
+//									 message:SHKLocalizedString(@"We could not shorten the URL.")
+//									delegate:nil
+//						   cancelButtonTitle:SHKLocalizedString(@"Continue")
+//						   otherButtonTitles:nil] autorelease] show];
+//		
+//		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.text ? item.text : item.title, [item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] forKey:@"status"];
+//	}
+//	
+//	else
+//	{		
+//		///if already a bitly login, use url instead
+//		if ([result isEqualToString:@"ALREADY_A_BITLY_LINK"])
+//			result = [item.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//		
+//		[item setCustomValue:[NSString stringWithFormat:@"%@ %@", item.text ? item.text : item.title, result] forKey:@"status"];
+//	}
+//	
+//	[self showTwitterForm];
+//}
 
 
 #pragma mark -
@@ -289,7 +303,16 @@
 - (BOOL)validate
 {
 	NSString *status = [item customValueForKey:@"status"];
-	return status != nil && status.length <= 140;
+	
+	NSInteger maxAllowedLength = 140;
+	if (item.URL != nil) {
+		maxAllowedLength += lengthUnshortendURL - maxLenghShortendURL;
+	}
+	if (item.image != nil) {
+		maxAllowedLength -= imageURLLength;
+	}
+	
+	return status != nil && status.length <= maxAllowedLength;
 }
 
 - (BOOL)send
@@ -330,9 +353,12 @@
 	
 	OARequestParameter *statusParam = [[OARequestParameter alloc] initWithName:@"status"
 																		 value:[item customValueForKey:@"status"]];
-	NSArray *params = [NSArray arrayWithObjects:statusParam, nil];
+	OARequestParameter *shortenURLParam = [[OARequestParameter alloc] initWithName:@"wrap_links" value:@"true"];
+	
+	NSArray *params = [NSArray arrayWithObjects:statusParam, shortenURLParam, nil];
 	[oRequest setParameters:params];
 	[statusParam release];
+	[shortenURLParam release];
 	
 	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
 																						  delegate:self
