@@ -171,7 +171,7 @@
 		[dictionary setObject:custom forKey:@"custom"];
 	
 	if (URL != nil)
-		[dictionary setObject:[URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:@"URL"];
+		[dictionary setObject:/*[URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]*/ URL.absoluteString forKey:@"URL"];
 	 
 	 if (title != nil)
 		[dictionary setObject:title forKey:@"title"];
