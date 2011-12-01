@@ -54,9 +54,9 @@
 		
 		
 		// You do not need to edit these, they are the same for everyone
-	    self.authorizeURL = [NSURL URLWithString:@"https://twitter.com/oauth/authorize"];
-	    self.requestURL = [NSURL URLWithString:@"https://twitter.com/oauth/request_token"];
-	    self.accessURL = [NSURL URLWithString:@"https://twitter.com/oauth/access_token"]; 
+	    self.authorizeURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/authorize"];
+	    self.requestURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"];
+	    self.accessURL = [NSURL URLWithString:@"https://api.twitter.com/oauth/access_token"]; 
 	}	
 	return self;
 }
@@ -145,14 +145,11 @@
 	{
 		NSDictionary *formValues = [pendingForm formValues];
 		
-		OARequestParameter *username = [[[OARequestParameter alloc] initWithName:@"x_auth_username"
-																		   value:[formValues objectForKey:@"username"]] autorelease];
+		OARequestParameter *username = [[[OARequestParameter alloc] initWithName:@"x_auth_username" value:[formValues objectForKey:@"username"]] autorelease];
 		
-		OARequestParameter *password = [[[OARequestParameter alloc] initWithName:@"x_auth_password"
-																		   value:[formValues objectForKey:@"password"]] autorelease];
+		OARequestParameter *password = [[[OARequestParameter alloc] initWithName:@"x_auth_password" value:[formValues objectForKey:@"password"]] autorelease];
 		
-		OARequestParameter *mode = [[[OARequestParameter alloc] initWithName:@"x_auth_mode"
-																	   value:@"client_auth"] autorelease];
+		OARequestParameter *mode = [[[OARequestParameter alloc] initWithName:@"x_auth_mode" value:@"client_auth"] autorelease];
 		
 		[oRequest setParameters:[NSArray arrayWithObjects:username, password, mode, nil]];
 	}
@@ -343,16 +340,11 @@
 
 - (void)sendStatus
 {
-	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"http://api.twitter.com/1/statuses/update.json"]
-																	consumer:consumer
-																	   token:accessToken
-																	   realm:nil
-														   signatureProvider:nil];
+	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/1/statuses/update.json"] consumer:consumer token:accessToken realm:nil signatureProvider:nil];
 	
 	[oRequest setHTTPMethod:@"POST"];
 	
-	OARequestParameter *statusParam = [[OARequestParameter alloc] initWithName:@"status"
-																		 value:[item customValueForKey:@"status"]];
+	OARequestParameter *statusParam = [[OARequestParameter alloc] initWithName:@"status" value:[item customValueForKey:@"status"]];
 	OARequestParameter *shortenURLParam = [[OARequestParameter alloc] initWithName:@"wrap_links" value:@"true"];
 	
 	NSArray *params = [NSArray arrayWithObjects:statusParam, shortenURLParam, nil];
@@ -360,10 +352,7 @@
 	[statusParam release];
 	[shortenURLParam release];
 	
-	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
-																						  delegate:self
-																				 didFinishSelector:@selector(sendStatusTicket:didFinishWithData:)
-																				   didFailSelector:@selector(sendStatusTicket:didFailWithError:)];	
+	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest delegate:self didFinishSelector:@selector(sendStatusTicket:didFinishWithData:) didFailSelector:@selector(sendStatusTicketdidFailWithError:)];
 	
 	[fetcher start];
 	[oRequest release];
@@ -423,16 +412,12 @@
 	
 	NSURL *serviceURL = nil;
 	if([item customValueForKey:@"profile_update"]){
-		serviceURL = [NSURL URLWithString:@"http://api.twitter.com/1/account/update_profile_image.json"];
+		serviceURL = [NSURL URLWithString:@"https://api.twitter.com/1/account/update_profile_image.json"];
 	} else {
 		serviceURL = [NSURL URLWithString:@"https://api.twitter.com/1/account/verify_credentials.json"];
 	}
 	
-	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:serviceURL
-																	consumer:consumer
-																	   token:accessToken
-																	   realm:@"http://api.twitter.com/"
-														   signatureProvider:signatureProvider];
+	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:serviceURL consumer:consumer token:accessToken realm:@"http://api.twitter.com/" signatureProvider:signatureProvider];
 	[oRequest setHTTPMethod:@"GET"];
 	
 	if([item customValueForKey:@"profile_update"]){
@@ -447,11 +432,7 @@
 		oRequest = nil;
 		
 		serviceURL = [NSURL URLWithString:@"http://img.ly/api/2/upload.xml"];
-		oRequest = [[OAMutableURLRequest alloc] initWithURL:serviceURL
-												   consumer:consumer
-													  token:accessToken
-													  realm:@"http://api.twitter.com/"
-										  signatureProvider:signatureProvider];
+		oRequest = [[OAMutableURLRequest alloc] initWithURL:serviceURL consumer:consumer token:accessToken realm:@"http://api.twitter.com/" signatureProvider:signatureProvider];
 		[oRequest setHTTPMethod:@"POST"];
 		[oRequest setValue:@"https://api.twitter.com/1/account/verify_credentials.json" forHTTPHeaderField:@"X-Auth-Service-Provider"];
 		[oRequest setValue:oauthHeader forHTTPHeaderField:@"X-Verify-Credentials-Authorization"];
@@ -509,10 +490,7 @@
 	[self sendDidStart];
 	
 	// Start the request
-	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
-																						  delegate:self
-																				 didFinishSelector:@selector(sendImageTicket:didFinishWithData:)
-																				   didFailSelector:@selector(sendImageTicket:didFailWithError:)];	
+	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest delegate:self didFinishSelector:@selector(sendImageTicket:didFinishWithData:) didFailSelector:@selector(sendImageTicket:didFailWithError:)];
 	
 	[fetcher start];
 	
@@ -556,18 +534,13 @@
 	// remove it so in case of other failures this doesn't get hit again
 	[item setCustomValue:nil forKey:@"followMe"];
 	
-	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://api.twitter.com/1/friendships/create/%@.json", SHKTwitterUsername]]
-																	consumer:consumer
-																	   token:accessToken
-																	   realm:nil
-														   signatureProvider:nil];
+	OAMutableURLRequest *oRequest = [[OAMutableURLRequest alloc] initWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://api.twitter.com/1/friendships/create/%@.json", SHKTwitterUsername]] consumer:consumer token:accessToken realm:nil signatureProvider:nil];
 	
 	[oRequest setHTTPMethod:@"POST"];
 	
 	OAAsynchronousDataFetcher *fetcher = [OAAsynchronousDataFetcher asynchronousFetcherWithRequest:oRequest
 																						  delegate:nil // Currently not doing any error handling here.  If it fails, it's probably best not to bug the user to follow you again.
-																				 didFinishSelector:nil
-																				   didFailSelector:nil];	
+																				 didFinishSelector:nil didFailSelector:nil];	
 	
 	[fetcher start];
 	[oRequest release];
